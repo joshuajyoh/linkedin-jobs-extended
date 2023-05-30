@@ -1,31 +1,21 @@
-let currentJobID = -1;
+let url = document.url;
 
-setTimeout(run, 2000);
-/*setInterval(() => {
-    run();
-}, 2000);*/
+setTimeout(run, 1000);
+
+// Rerun anytime the url changes (within the specified match)
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    const urlNew = request.url;
+
+    if (url !== urlNew) {
+        url = urlNew;
+        setTimeout(run, 1000);
+    }
+});
 
 function run() {
-    const jobID = getJobID();
-
-    if (jobID === undefined || jobID === currentJobID) { return; }
-
-    currentJobID = jobID;
-
     const data = getJobDescriptionData();
 
     addYOEStatements(data);
-}
-
-function getJobID() {
-    const jobLink = document.getElementsByClassName("jobs-unified-top-card__content--two-pane")[0]?.firstChild?.baseURI;
-
-    if (jobLink === undefined) { return undefined; }
-
-    const start = jobLink.indexOf("currentJobId=") + 13;
-    const end = jobLink.indexOf("&", start);
-
-    return jobLink.substring(start, end);
 }
 
 function getJobDescriptionData() {
@@ -75,5 +65,5 @@ function addYOEStatements(data) {
 }
 
 function getYOEStatements(data) {
-    return data.match(/(\d+-)?\d+\+? years[^\n]*experience[^\n]*/g);
+    return data.match(/(\d+-)?\d+\+? years[^\n]*experience[^\n]*/g) ?? [];
 }
