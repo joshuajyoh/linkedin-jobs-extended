@@ -1,0 +1,20 @@
+.container {
+    min-width: max-content;
+}
+
+label {
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.form-check-reverse {
+    text-align: left;
+}
+
+.form-switch.form-check-reverse {
+    padding-right: 6em;
+}
+
+.form-switch.form-check-reverse .form-check-input {
+    margin-right: -6em;
+}

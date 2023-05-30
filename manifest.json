@@ -1,8 +1,13 @@
 {
     "manifest_version": 3,
     "name": "LInkedIn Jobs Extended",
-    "version": "0.5.1",
-    "permissions": [ "tabs" ],
+    "description": "Includes additional information in the highlights section of LinkedIn job postings, using the content of the job description.",
+    "version": "0.7",
+    "permissions": [ "storage", "tabs" ],
+    "options_ui": {
+        "page": "options.html",
+        "open_in_tab": false
+    },
     "content_scripts": [
         {
             "js": [ "scripts/content.js" ],

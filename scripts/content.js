@@ -1,19 +1,46 @@
-// Run upon initial content script trigger
-setTimeout(run, 1000);
+// At start of content script get options values and run
+chrome.storage.sync.get(
+    {
+        features: {
+            yearsOfExperience: true,
+            education: true,
+            driversLicense: false
+        }
+    },
+    (data) => {
+        featureOptions = [
+            data.features.yearsOfExperience,
+            data.features.education,
+            data.features.driversLicense
+        ];
+
+        setTimeout(run, 750);
+    }
+);
 
 // Run when notified by the service worker
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     setTimeout(run, 500);
 });
 
+// Match when options update
+chrome.storage.sync.onChanged.addListener((changes) => {
+    featureOptions = [
+        changes.features.newValue.yearsOfExperience,
+        changes.features.newValue.education,
+        changes.features.newValue.driversLicense
+    ];
+});
+
 // Parse the page's job description, find lines relevant to specified
 // requirements, and add them to the page's highlights
 function run() {
     const jobDescription = getJobDescription();
-    console.log(jobDescription);
 
-    for (let feature of featureList) {
-        addHighlights(jobDescription, feature);
+    for (let i = 0; i < featureList.length;++i) {
+        if (featureOptions[i]) {
+            addHighlights(jobDescription, featureList[i]);
+        }
     }
 }
 
@@ -70,6 +97,8 @@ function addHighlights(jobDescription, feature) {
         jobHighlights.insertAdjacentElement('beforeend', highlight);
     }
 }
+
+let featureOptions = [];
 
 const featureList = [
     {
