@@ -9,14 +9,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Parse the page's job description, find lines relevant to specified
 // requirements, and add them to the page's highlights
 function run() {
-    const data = getJobDescriptionData();
+    const jobDescription = getJobDescription();
 
-    addHighlights(getYOEStatements(data), yoeIcon);
-    addHighlights(getDriversLicenseStatements(data), driversLicenseIcon);
+    for (let feature of featureList) {
+        addHighlights(jobDescription, feature);
+    }
 }
 
 // Parse the page's job description and format into a multi-line string
-function getJobDescriptionData() {
+function getJobDescription() {
     const jobDescHTML = document.getElementsByClassName("jobs-description-content__text")[0]?.lastElementChild;
 
     let jobDescText = jobDescHTML.innerHTML;
@@ -33,7 +34,11 @@ function getJobDescriptionData() {
 }
 
 // Insert additional highlights into the page's HTML
-function addHighlights(statements, iconHTML) {
+function addHighlights(jobDescription, feature) {
+    // Get statements from the job description relevant to the specified
+    // feature
+    const statements = jobDescription.match(feature.matching) ?? [];
+
     const jobHighlights = document.getElementsByClassName("jobs-unified-top-card__content--two-pane")[0].children[2].firstElementChild;
 
     for (let st of statements) {
@@ -48,7 +53,7 @@ function addHighlights(statements, iconHTML) {
         <div class="ivm-view-attr__img-wrapper ivm-view-attr__img-wrapper--use-img-tag display-flex">
         <li-icon aria-hidden="true" type="job" size="large">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" data-supported-dps="24x24" fill="none" class="mercado-match" width="24" height="24" focusable="false" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        ${iconHTML}
+        ${feature.iconHTML}
         </svg>
         </li-icon>
         </div>
@@ -65,13 +70,15 @@ function addHighlights(statements, iconHTML) {
     }
 }
 
-function getYOEStatements(data) {
-    return data.match(/(\d+-)?\d+\+? years[^\n]*experience[^\n]*/g) ?? [];
-}
-
-function getDriversLicenseStatements(data) {
-    return data.match(/[^\.\n]*driver’s license[^\n]*/g) ?? [];
-}
-
-const yoeIcon = `<path d="M20 6 9 17 4 12"></path>`;
-const driversLicenseIcon = `<rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line>`;
+const featureList = [
+    {
+        name: "yearsOfExperience",
+        matching: /(\d+-)?\d+\+? years[^\n]*experience[^\n]*/g,
+        iconHTML: `<path d="M20 6 9 17 4 12"></path>`
+    },
+    {
+        name: "driversLicense",
+        matching: /[^\.\n]*driver’s license[^\n]*/g,
+        iconHTML: `<rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line>`
+    }
+];
