@@ -15,7 +15,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 function run() {
     const data = getJobDescriptionData();
 
-    addYOEStatements(data);
+    addHighlights(getYOEStatements(data), yoeIcon);
+    addHighlights(getDriversLicenseStatements(data), driversLicenseIcon);
 }
 
 function getJobDescriptionData() {
@@ -34,9 +35,7 @@ function getJobDescriptionData() {
     return jobDescText;
 }
 
-function addYOEStatements(data) {
-    const statements = getYOEStatements(data);
-
+function addHighlights(statements, iconHTML) {
     const jobHighlights = document.getElementsByClassName("jobs-unified-top-card__content--two-pane")[0].children[2].firstElementChild;
 
     for (let st of statements) {
@@ -48,8 +47,8 @@ function addYOEStatements(data) {
         highlightIcon.innerHTML = `<div class="ivm-image-view-model">
         <div class="ivm-view-attr__img-wrapper ivm-view-attr__img-wrapper--use-img-tag display-flex">
         <li-icon aria-hidden="true" type="job" size="large">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" data-supported-dps="24x24" fill="none" class="mercado-match" width="24" height="24" focusable="false" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20 6 9 17 4 12"></path>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" data-supported-dps="24x24" fill="none" class="mercado-match" width="24" height="24" focusable="false" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        ${iconHTML}
         </svg>
         </li-icon>
         </div>
@@ -67,3 +66,10 @@ function addYOEStatements(data) {
 function getYOEStatements(data) {
     return data.match(/(\d+-)?\d+\+? years[^\n]*experience[^\n]*/g) ?? [];
 }
+
+function getDriversLicenseStatements(data) {
+    return data.match(/[^\.\n]*driver’s license[^\n]*/g) ?? [];
+}
+
+const yoeIcon = `<path d="M20 6 9 17 4 12"></path>`;
+const driversLicenseIcon = `<rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line>`;
