@@ -3,5 +3,5 @@ A chrome extension that includes additional information in the highlights sectio
 
 ## Current Features
 - YOE specific requirements
-- Educatoin requirements
+- Education requirements
 - Driver's license requirements
