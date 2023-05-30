@@ -51,7 +51,7 @@ function getJobDescription() {
     let jobDescText = jobDescHTML.innerHTML;
 
     // Manage element tags
-    jobDescText = jobDescText.replaceAll(/(<\/?(strong|i|ul)>|<(p|li)>)/g, "");
+    jobDescText = jobDescText.replaceAll(/(<\/?(strong|i|ul|u)>|<(p|li)>)/g, "");
     jobDescText = jobDescText.replaceAll(/(<br>|<\/(p|li)>)/g, "\n");
 
     // Manage whitespace
