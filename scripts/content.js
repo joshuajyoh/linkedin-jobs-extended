@@ -10,6 +10,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // requirements, and add them to the page's highlights
 function run() {
     const jobDescription = getJobDescription();
+    console.log(jobDescription);
 
     for (let feature of featureList) {
         addHighlights(jobDescription, feature);
@@ -73,12 +74,17 @@ function addHighlights(jobDescription, feature) {
 const featureList = [
     {
         name: "yearsOfExperience",
-        matching: /(\d+-)?\d+\+? years[^\n]*experience[^\n]*/g,
+        matching: /(\d+-)?\d+\+? years[^\n]*experience[^\n]*/gi,
         iconHTML: `<path d="M20 6 9 17 4 12"></path>`
     },
     {
+        name: "education",
+        matching: /[^\.\n]*((bachelor|master)('|’)?s degree|degree in|doctorate|phd)[^\n]*/gi,
+        iconHTML: `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>`
+    },
+    {
         name: "driversLicense",
-        matching: /[^\.\n]*driver’s license[^\n]*/g,
+        matching: /[^\.\n]*driver’s license[^\n]*/gi,
         iconHTML: `<rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line>`
     }
 ];
