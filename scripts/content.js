@@ -1,74 +1,79 @@
-const jobData = new Map();
-let numRefreshes = 0;
+let currentJobID = -1;
 
-setTimeout(() => {
-    refreshJobData();
-    setInterval(() => {
-        refreshJobData();
-    }, 5000);
-}, 1000);
+setTimeout(run, 2000);
+/*setInterval(() => {
+    run();
+}, 2000);*/
 
-async function refreshJobData() {
+function run() {
+    const jobID = getJobID();
 
-    const jobSearchResults = document.getElementsByClassName("job-card-container");
+    if (jobID === undefined || jobID === currentJobID) { return; }
 
-    for (let jobSearchItem of jobSearchResults) {
-        const jobID = jobSearchItem.getAttribute("data-job-id");
+    currentJobID = jobID;
 
-        if (jobData.has(jobID)) {
-            jobData.get(jobID).refreshSet = numRefreshes;
-            continue;
-        }
+    const data = getJobDescriptionData();
 
-        updateJobCard(jobSearchItem);
-
-        jobData.set(jobID, {
-            refreshSet: numRefreshes
-        });
-    }
-
-    ++numRefreshes;
+    addYOEStatements(data);
 }
 
-async function updateJobCard(card) {
-    const jobLink = card.getElementsByClassName("job-card-container__link")[0].getAttribute("href");
+function getJobID() {
+    const jobLink = document.getElementsByClassName("jobs-unified-top-card__content--two-pane")[0]?.firstChild?.baseURI;
 
-    const jobDescription = await getJobDescription(jobLink);
+    if (jobLink === undefined) { return undefined; }
 
-    const info = card.getElementsByClassName("artdeco-entity-lockup__content")[0];
+    const start = jobLink.indexOf("currentJobId=") + 13;
+    const end = jobLink.indexOf("&", start);
 
-    updateYOE(jobDescription, info);
+    return jobLink.substring(start, end);
 }
 
-async function getJobDescription(jobLink) {
-    const res = await fetch(jobLink);
-    const text = await res.text();
+function getJobDescriptionData() {
+    const jobDescHTML = document.getElementsByClassName("jobs-description-content__text")[0]?.lastElementChild;
 
-    let description = decode(text);
-    description = description.substring(description.indexOf('companyDetails'));
-    description = description.substring(description.indexOf('"text":') + 7);
-    description = description.substring(0, description.indexOf(`,"$type"`));
+    let jobDescText = jobDescHTML.innerHTML;
 
-    return description;
+    jobDescText = jobDescText.replaceAll(/<\/?(strong|i)>/g, "");
+    jobDescText = jobDescText.replaceAll(/<br>/g, "\n");
+    jobDescText = jobDescText.replaceAll(/<\/?ul>/g, "");
+    jobDescText = jobDescText.replaceAll(/<(p|li)>/g, "");
+    jobDescText = jobDescText.replaceAll(/<\/(p|li)>/g, "\n");
+    jobDescText = jobDescText.replaceAll(/\n\n+/g, "\n");
+    jobDescText = jobDescText.trim();
+
+    return jobDescText;
 }
 
-function updateYOE(description, info) {
-    const matches = description.match(/()?\d\+? years[^\.]+experience[^\.\n]+/g);
+function addYOEStatements(data) {
+    const statements = getYOEStatements(data);
 
-    if (matches === null || matches.length === 0) { return; }
+    const jobHighlights = document.getElementsByClassName("jobs-unified-top-card__content--two-pane")[0].children[2].firstElementChild;
 
-    for (let i = 0; i < matches.length; ++i) {
-        const index = matches[i].search(/[a-z][A-Z]/);
-        if (index !== -1) {
-            matches[i] = matches[i].substring(0, index + 1);
-        }
+    for (let st of statements) {
+        const highlight = document.createElement('li');
+        highlight.classList.add("jobs-unified-top-card__job-insight");
+
+        const highlightIcon = document.createElement('div');
+        highlightIcon.classList.add("flex-shrink-zero", "mr2", "t-black--light");
+        highlightIcon.innerHTML = `<div class="ivm-image-view-model">
+        <div class="ivm-view-attr__img-wrapper ivm-view-attr__img-wrapper--use-img-tag display-flex">
+        <li-icon aria-hidden="true" type="job" size="large">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" data-supported-dps="24x24" fill="none" class="mercado-match" width="24" height="24" focusable="false" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6 9 17 4 12"></path>
+        </svg>
+        </li-icon>
+        </div>
+        </div>`;
+
+        const highlightText = document.createElement("span");
+        highlightText.textContent = st;
+
+        highlight.insertAdjacentElement("beforeend", highlightIcon);
+        highlight.insertAdjacentElement("beforeend", highlightText);
+        jobHighlights.insertAdjacentElement('beforeend', highlight);
     }
+}
 
-    for (let match of matches) {
-        const yearsOfExperience = document.createElement("div");
-        yearsOfExperience.classList.add("linkedin-jobs-extended__subtitle", "artdeco-entity-lockup__subtitle");
-        yearsOfExperience.textContent = `• ${match}`;
-
-        info.insertAdjacentElement("beforeEnd", yearsOfExperience);
-    }
+function getYOEStatements(data) {
+    return data.match(/(\d+-)?\d+\+? years[^\n]*experience[^\n]*/g);
 }
