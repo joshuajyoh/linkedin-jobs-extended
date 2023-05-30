@@ -3,7 +3,7 @@ setTimeout(run, 1000);
 
 // Run when notified by the service worker
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    setTimeout(run, 1000);
+    setTimeout(run, 500);
 });
 
 // Parse the page's job description, find lines relevant to specified
@@ -22,11 +22,11 @@ function getJobDescription() {
 
     let jobDescText = jobDescHTML.innerHTML;
 
-    jobDescText = jobDescText.replaceAll(/<\/?(strong|i)>/g, "");
-    jobDescText = jobDescText.replaceAll(/<br>/g, "\n");
-    jobDescText = jobDescText.replaceAll(/<\/?ul>/g, "");
-    jobDescText = jobDescText.replaceAll(/<(p|li)>/g, "");
-    jobDescText = jobDescText.replaceAll(/<\/(p|li)>/g, "\n");
+    // Manage element tags
+    jobDescText = jobDescText.replaceAll(/(<\/?(strong|i|ul)>|<(p|li)>)/g, "");
+    jobDescText = jobDescText.replaceAll(/(<br>|<\/(p|li)>)/g, "\n");
+
+    // Manage whitespace
     jobDescText = jobDescText.replaceAll(/\n\n+/g, "\n");
     jobDescText = jobDescText.trim();
 
