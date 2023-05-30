@@ -1,17 +1,13 @@
-let url = document.url;
-
+// Run upon initial content script trigger
 setTimeout(run, 1000);
 
-// Rerun anytime the url changes (within the specified match)
+// Run when notified by the service worker
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    const urlNew = request.url;
-
-    if (url !== urlNew) {
-        url = urlNew;
-        setTimeout(run, 1000);
-    }
+    setTimeout(run, 1000);
 });
 
+// Parse the page's job description, find lines relevant to specified
+// requirements, and add them to the page's highlights
 function run() {
     const data = getJobDescriptionData();
 
@@ -19,6 +15,7 @@ function run() {
     addHighlights(getDriversLicenseStatements(data), driversLicenseIcon);
 }
 
+// Parse the page's job description and format into a multi-line string
 function getJobDescriptionData() {
     const jobDescHTML = document.getElementsByClassName("jobs-description-content__text")[0]?.lastElementChild;
 
@@ -35,13 +32,16 @@ function getJobDescriptionData() {
     return jobDescText;
 }
 
+// Insert additional highlights into the page's HTML
 function addHighlights(statements, iconHTML) {
     const jobHighlights = document.getElementsByClassName("jobs-unified-top-card__content--two-pane")[0].children[2].firstElementChild;
 
     for (let st of statements) {
+        // Create parent highlight block
         const highlight = document.createElement('li');
         highlight.classList.add("jobs-unified-top-card__job-insight");
 
+        // Create highlight icon
         const highlightIcon = document.createElement('div');
         highlightIcon.classList.add("flex-shrink-zero", "mr2", "t-black--light");
         highlightIcon.innerHTML = `<div class="ivm-image-view-model">
@@ -54,9 +54,11 @@ function addHighlights(statements, iconHTML) {
         </div>
         </div>`;
 
+        // Create highlight text
         const highlightText = document.createElement("span");
         highlightText.textContent = st;
 
+        // Insert into page
         highlight.insertAdjacentElement("beforeend", highlightIcon);
         highlight.insertAdjacentElement("beforeend", highlightText);
         jobHighlights.insertAdjacentElement('beforeend', highlight);
