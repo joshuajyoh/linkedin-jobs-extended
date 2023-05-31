@@ -13,14 +13,12 @@ chrome.storage.sync.get(
             data.features.education,
             data.features.driversLicense
         ];
-
-        setTimeout(run, 750);
     }
 );
 
 // Run when notified by the service worker
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    setTimeout(run, 500);
+    setTimeout(run, request.delay);
 });
 
 // Match when options update
