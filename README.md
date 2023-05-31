@@ -1,7 +1,10 @@
-# linkedin-job-highlights
-A chrome extension that includes additional information in the highlights section of LinkedIn job postings, using the content of the job description.
+# linkedin-jobs-extended
+A Chrome extension that searches LinkedIn job post descriptions for phrases associated with key categories that are not normally provided in the post's highlights section and includes them as additional highlights.
 
-## Current Features
-- YOE specific requirements
-- Education requirements
-- Driver's license requirements
+## Categories
+
+The extension will search for additional highlights based on the following categories. Such categories to be toggled on/off in options.
+
+- **Years of Experience**: e.g. "5 years of experience in Java"
+- **Education**: e.g. "A Bachelor's degree in Computer Science"
+- **Driver's license**: e.g. "A valid driver's license is required"
