@@ -1,7 +1,7 @@
 # linkedin-jobs-extended
 A Chrome extension that searches LinkedIn job post descriptions for phrases associated with key categories that are not normally provided in the post's highlights section and includes them as additional highlights.
 
-| Before              | AFter              |
+| Before              | After              |
 | ------------------- | ------------------ |
 | ![alt text][before] | ![alt text][after] |
 
