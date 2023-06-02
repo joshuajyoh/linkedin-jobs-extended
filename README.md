@@ -7,7 +7,7 @@ A Chrome extension that searches LinkedIn job post descriptions for phrases asso
 
 ## Categories
 
-The extension will search for additional highlights based on the following categories. Such categories to be toggled on/off in options.
+The extension searches for additional highlights based on the following categories. Such categories can be toggled on/off in options.
 
 - **Years of Experience**: e.g. "5 years of experience in Java"
 - **Education**: e.g. "A Bachelor's degree in Computer Science"
