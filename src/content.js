@@ -1,4 +1,5 @@
 // At start of content script get options values
+console.log("HI");
 chrome.storage.sync.get(
     {
         features: {
@@ -102,7 +103,7 @@ let featureOptions = [];
 const featureList = [
     {
         name: "yearsOfExperience",
-        matching: /[^\n]*(\d+-)?\d+\+? years[^\n]*experience[^\n]*/gi,
+        matching: /[^\n]*(\d+-)?\d+(\+| plus)? years[^\n]*experience[^\n]*/gi,
         iconHTML: `<path d="M20 6 9 17 4 12"></path>`
     },
     {
