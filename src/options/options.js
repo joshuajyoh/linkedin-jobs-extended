@@ -14,6 +14,7 @@ function save() {
         features: {
             yearsOfExperience: document.getElementById("switchYOE").checked,
             education: document.getElementById("switchEducation").checked,
+            certs: document.getElementById("switchCerts").checked,
             driversLicense: document.getElementById("switchDLicense").checked
         }
     };
@@ -30,12 +31,14 @@ function load() {
         features: {
             yearsOfExperience: true,
             education: true,
+            certs: false,
             driversLicense: false
         }
     },
     (data) => {
         document.getElementById("switchYOE").checked = data.features.yearsOfExperience;
         document.getElementById("switchEducation").checked = data.features.education;
+        document.getElementById("switchCerts").checked = data.features.certs;
         document.getElementById("switchDLicense").checked = data.features.driversLicense;
     });
 }

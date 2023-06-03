@@ -5,6 +5,7 @@ chrome.storage.sync.get(
         features: {
             yearsOfExperience: true,
             education: true,
+            certs: false,
             driversLicense: false
         }
     },
@@ -12,6 +13,7 @@ chrome.storage.sync.get(
         featureOptions = [
             data.features.yearsOfExperience,
             data.features.education,
+            data.features.certs,
             data.features.driversLicense
         ];
     }
@@ -27,6 +29,7 @@ chrome.storage.sync.onChanged.addListener((changes) => {
     featureOptions = [
         changes.features.newValue.yearsOfExperience,
         changes.features.newValue.education,
+        changes.features.newValue.certs,
         changes.features.newValue.driversLicense
     ];
 });
@@ -110,6 +113,11 @@ const featureList = [
         name: "education",
         matching: /[^\.\n]*((bachelor|master)('|’)?s degree|degree in|doctorate|phd)[^\n]*/gi,
         iconHTML: `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>`
+    },
+    {
+        name: "certifications",
+        matching: /[^\.\n]*(certified|certification)[^\n]*/gi,
+        iconHTML: `<circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>`
     },
     {
         name: "driversLicense",
