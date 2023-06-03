@@ -1,4 +1,4 @@
-// At start of content script get options values and run
+// At start of content script get options values
 chrome.storage.sync.get(
     {
         features: {
@@ -96,6 +96,7 @@ function addHighlights(jobDescription, feature) {
     }
 }
 
+// Determines whether feature is searched for or not
 let featureOptions = [];
 
 const featureList = [
