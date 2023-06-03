@@ -2,30 +2,30 @@
     "manifest_version": 3,
     "name": "LInkedIn Jobs Extended",
     "description": "Includes additional information in the highlights section of LinkedIn job postings, using the content of the job description.",
-    "version": "0.8.7",
+    "version": "0.8.8",
     "icons": {
-        "16": "images/icon-16.png",
-        "32": "images/icon-32.png",
-        "48": "images/icon-48.png",
-        "128": "images/icon-128.png"
+        "16": "icons/icon-16.png",
+        "32": "icons/icon-32.png",
+        "48": "icons/icon-48.png",
+        "128": "icons/icon-128.png"
     },
     "permissions": [ "storage", "tabs" ],
     "action": {
-        "default_popup": "popup.html"
+        "default_popup": "src/popup/popup.html"
     },
     "options_ui": {
-        "page": "options.html",
+        "page": "src/options/options.html",
         "open_in_tab": false
     },
     "content_scripts": [
         {
-            "js": [ "scripts/content.js" ],
+            "js": [ "src/content.js" ],
             "matches": [
                 "https://www.linkedin.com/*"
             ]
         }
     ],
     "background": {
-        "service_worker": "scripts/service-worker.js"
+        "service_worker": "src/service-worker.js"
     }
 }
