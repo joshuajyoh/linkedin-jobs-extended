@@ -119,22 +119,22 @@ let featureOptions = [];
 const featureList = [
     {
         name: "yearsOfExperience",
-        matching: /[^\n]*(\d+-)?\d+(\+| plus)? years?[^\n]*experience[^\n]*/gi,
+        matching: /[^\n]*(\d+-)?\d+(\+| plus)? years?[^\n]*experience[^\.\n]*/gi,
         iconHTML: `<path d="M20 6 9 17 4 12"></path>`
     },
     {
         name: "education",
-        matching: /[^\.\n]*((bachelor|master)('|’)?s degree|degree in|doctorate|phd)[^\n]*/gi,
+        matching: /[^\.\n]*((bachelor|master)('|’)?s degree|degree in|doctorate|phd)[^\.\n]*/gi,
         iconHTML: `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>`
     },
     {
         name: "certifications",
-        matching: /[^\.\n]*(certified|certification)[^\n]*/gi,
+        matching: /[^\.\n]*(certified|certification)[^\.\n]*/gi,
         iconHTML: `<circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>`
     },
     {
         name: "driversLicense",
-        matching: /[^\.\n]*driver’s license[^\n]*/gi,
+        matching: /[^\.\n]*driver’s license[^\.\n]*/gi,
         iconHTML: `<rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line>`
     },
     {
