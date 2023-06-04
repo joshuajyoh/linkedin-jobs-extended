@@ -1,8 +1,10 @@
 let previousURL = "";
 let previousURLIsJobPost = false;
+let previousURLJobPostType = undefined;
 
 let currentURL = "";
 let currentURLIsJobPost = false;
+let currentURLJobPostType = undefined;
 
 let isLoadingNewJobPost = false;
 let isLoadingJobPostRefresh = false;
@@ -16,41 +18,74 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (url !== undefined) {
         previousURL = currentURL;
         previousURLIsJobPost = currentURLIsJobPost;
+        previousURLJobPostType = currentURLJobPostType;
 
         currentURL = url;
-        currentURLIsJobPost = isJobPost(url);
+
+        const urlData = classifyURL(url);
+        currentURLIsJobPost = urlData.isJobPost;
+        currentURLJobPostType = urlData.pageType;
     }
 
-    if (isJobPost(url) && status === "loading") {
+    if (classifyURL(url).isJobPost && status === "loading") {
         isLoadingNewJobPost = true;
     } else if (isLoadingNewJobPost && status === "complete") {
         isLoadingNewJobPost = false;
 
-        if (previousURLIsJobPost) {
-            chrome.tabs.sendMessage(tabId, { delay: 500 });
+        if (previousURLJobPostType === currentURLJobPostType) {
+            chrome.tabs.sendMessage(tabId, {
+                delay: 500,
+                pageType: currentURLJobPostType
+            });
         } else {
-            chrome.tabs.sendMessage(tabId, { delay: 1000 });
+            chrome.tabs.sendMessage(tabId, {
+                delay: 1000,
+                pageType: currentURLJobPostType
+            });
         }
     } else if (url === undefined && status === "loading" && currentURLIsJobPost) {
         isLoadingJobPostRefresh = true;
     } else if (isLoadingJobPostRefresh && status === "complete") {
         isLoadingJobPostRefresh = false;
-        chrome.tabs.sendMessage(tabId, { delay: 1000 });
+        chrome.tabs.sendMessage(tabId, {
+            delay: 1000,
+            pageType: currentURLJobPostType
+        });
     }
 });
 
-function isJobPost(url) {
-    if (url === undefined) { return false; }
+const jobPageURLs = [
+    {
+        pageType: "search",
+        matching: /https:\/\/www.linkedin.com\/jobs\/search\/\?currentJobId=.*/
+    },
+    {
+        pageType: "view",
+        matching: /https:\/\/www.linkedin.com\/jobs\/view\/\d+\/*/
+    },
+    {
+        pageType: "recommended",
+        matching: /https:\/\/www.linkedin.com\/jobs\/collections\/recommended\/\?currentJobId=.*/
+    }
+];
 
-    for (let exp of jobPostURLRegExs) {
-        if (exp.test(url)) {
-            return true;
+function classifyURL(url) {
+    if (url === undefined) {
+        return {
+            isJobPost: false
+        };
+    }
+
+    for (let jobPageURL of jobPageURLs) {
+        if (jobPageURL.matching.test(url)) {
+            return {
+                isJobPost: true,
+                pageType: jobPageURL.pageType
+            };
         }
     }
 
-    return false;
+    return {
+        isJobPost: false
+    };
 }
-
-const jobPostURLRegExs = [
-    /https:\/\/www.linkedin.com\/jobs\/search\/\?currentJobId=.*/
-];

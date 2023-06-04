@@ -22,7 +22,7 @@ chrome.storage.sync.get(
 
 // Run when notified by the service worker
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    setTimeout(run, request.delay);
+    setTimeout(() => { run(request.pageType); }, request.delay);
 });
 
 // Match when options update
@@ -38,12 +38,12 @@ chrome.storage.sync.onChanged.addListener((changes) => {
 
 // Parse the page's job description, find lines relevant to specified
 // requirements, and add them to the page's highlights
-function run() {
+function run(pageType) {
     const jobDescription = getJobDescription();
 
     for (let i = 0; i < featureList.length;++i) {
         if (featureOptions[i]) {
-            addHighlights(jobDescription, featureList[i]);
+            addHighlights(pageType, jobDescription, featureList[i]);
         }
     }
 }
@@ -66,12 +66,23 @@ function getJobDescription() {
 }
 
 // Insert additional highlights into the page's HTML
-function addHighlights(jobDescription, feature) {
+function addHighlights(pageType, jobDescription, feature) {
     // Get statements from the job description relevant to the specified
     // feature
     const statements = jobDescription.match(feature.matching) ?? [];
 
-    const jobHighlights = document.getElementsByClassName("jobs-unified-top-card__content--two-pane")[0].children[2].firstElementChild;
+    let jobHighlights;
+    switch (pageType) {
+        case "search":
+        case "recommended":
+            jobHighlights = document.getElementsByClassName("jobs-unified-top-card__content--two-pane")[0].children[2].firstElementChild;
+            break;
+        case "view":
+            jobHighlights = document.getElementsByClassName("jobs-unified-top-card")[0].children[0].children[0].children[3].firstElementChild;
+            break;
+        default:
+            throw new Error("Unknown page type");
+    }
 
     for (let st of statements) {
         // Create parent highlight block
