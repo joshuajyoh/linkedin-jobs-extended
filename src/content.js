@@ -1,12 +1,12 @@
 // At start of content script get options values
-console.log("HI");
 chrome.storage.sync.get(
     {
         features: {
             yearsOfExperience: true,
             education: true,
             certs: false,
-            driversLicense: false
+            driversLicense: false,
+            coverLetter: false
         }
     },
     (data) => {
@@ -14,7 +14,8 @@ chrome.storage.sync.get(
             data.features.yearsOfExperience,
             data.features.education,
             data.features.certs,
-            data.features.driversLicense
+            data.features.driversLicense,
+            data.features.coverLetter
         ];
     }
 );
@@ -30,7 +31,8 @@ chrome.storage.sync.onChanged.addListener((changes) => {
         changes.features.newValue.yearsOfExperience,
         changes.features.newValue.education,
         changes.features.newValue.certs,
-        changes.features.newValue.driversLicense
+        changes.features.newValue.driversLicense,
+        changes.features.newValue.coverLetter
     ];
 });
 
@@ -123,5 +125,10 @@ const featureList = [
         name: "driversLicense",
         matching: /[^\.\n]*driver’s license[^\n]*/gi,
         iconHTML: `<rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line>`
+    },
+    {
+        name: "coverLetter",
+        matching: /[^\.\n]*cover letter[^\.\n]*/gi,
+        iconHTML: `<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline>`
     }
 ];
