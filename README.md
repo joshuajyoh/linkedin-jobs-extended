@@ -1,5 +1,5 @@
 # linkedin-jobs-extended
-A Chrome extension that searches a LinkedIn job posting for key details and adds them to the top for easy viewing.
+A Chrome extension that searches LinkedIn job postings for key details and adds them to the top for easy viewing.
 
 | Before              | After              |
 | ------------------- | ------------------ |
