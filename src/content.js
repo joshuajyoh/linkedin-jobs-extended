@@ -108,8 +108,6 @@ function getJobDescription() {
 
     jobDescText = jobDescLines.join('\n');
 
-    console.log(jobDescText);
-
     return jobDescText;
 }
 
