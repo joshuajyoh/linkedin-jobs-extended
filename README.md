@@ -1,5 +1,5 @@
 # linkedin-jobs-extended
-A Google Chrome extension that searches LinkedIn job post descriptions for phrases associated with key categories that are not normally provided in the post's highlights section and includes them as additional highlights.
+A Chrome extension that searches a LinkedIn job posting for key details and adds them to the top for easy viewing.
 
 | Before              | After              |
 | ------------------- | ------------------ |
@@ -7,12 +7,13 @@ A Google Chrome extension that searches LinkedIn job post descriptions for phras
 
 ## Categories
 
-The extension searches for additional highlights based on the following categories. Such categories can be toggled on/off in options.
+The extension looks for the following kinds of information, which can be toggled on/off:
 
-- **Years of Experience**: e.g. "5 years of experience in Java"
-- **Education**: e.g. "Must have a Bachelor's degree in Computer Science or equivalent"
-- **Certifications**: e.g. "Must be a certified AWS Solutions Architect"
-- **Driver's license**: e.g. "A valid driver's license is required"
+- Years of Experience
+- Education
+- Certifications
+- Driver's license
+- Cover Letter
 
 [before]: https://github.com/joshuajyoh/linkedin-jobs-extended/blob/main/README/before.png
 [after]: https://github.com/joshuajyoh/linkedin-jobs-extended/blob/main/README/after.png
