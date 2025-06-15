@@ -39,28 +39,76 @@ chrome.storage.sync.onChanged.addListener((changes) => {
 // Parse the page's job description, find lines relevant to specified
 // requirements, and add them to the page's highlights
 function run(pageType) {
+    const oldHighlightGroupContainer = document.getElementsByClassName("linkedin-jobs-extended-highlight-group-container")?.[0];
+
+    if (oldHighlightGroupContainer !== undefined)
+        oldHighlightGroupContainer.remove();
+
+    const highlightGroupContainer = document.createElement("div");
+    
+    highlightGroupContainer.className = "linkedin-jobs-extended-highlight-group-container";
+
+    highlightGroupContainer.setAttribute("style", `
+        margin-top: 16px;
+    `);
+
+    let jobDetailsBlock;
+
+    switch (pageType) {
+        case "search":
+        case "recommended":
+        case "view":
+            jobDetailsBlock = document.getElementsByClassName("job-details-preferences-and-skills")[0];
+            break;
+        default:
+            throw new Error("Unknown page type");
+    }
+
+    jobDetailsBlock.insertAdjacentElement("afterend", highlightGroupContainer);
+
     const jobDescription = getJobDescription();
+
+    let noFeaturesFound = true;
 
     for (let i = 0; i < featureList.length;++i) {
         if (featureOptions[i]) {
-            addHighlights(pageType, jobDescription, featureList[i]);
+            if (addHighlights(pageType, jobDescription, featureList[i]))
+                noFeaturesFound = false;
         }
     }
+
+    if (noFeaturesFound)
+        highlightGroupContainer.innerHTML = "LinkedIn Jobs Extended did not find any matches.";
 }
 
 // Parse the page's job description and format into a multi-line string
 function getJobDescription() {
-    const jobDescHTML = document.getElementsByClassName("jobs-description-content__text")[0]?.lastElementChild;
+    const jobDescHTML = document.getElementsByClassName("jobs-box__html-content")[0].children[1].children[0];
 
     let jobDescText = jobDescHTML.innerHTML;
 
     // Manage element tags
-    jobDescText = jobDescText.replaceAll(/(<\/?(strong|i|ul|u)>|<(p|li)>)/g, "");
-    jobDescText = jobDescText.replaceAll(/(<br>|<\/(p|li)>)/g, "\n");
+    jobDescText = jobDescText.replaceAll(/(<\/?(strong|i|ul|u|(span( class="white-space-pre")?))>|<(p|li)>|<!---->|      )/g, "");
+    jobDescText = jobDescText.replaceAll(/<br>|<\/(p|li)>/g, "\n");
 
     // Manage whitespace
     jobDescText = jobDescText.replaceAll(/\n\n+/g, "\n");
     jobDescText = jobDescText.trim();
+
+    const jobDescLines = jobDescText.split('\n');
+
+    // Format individual lines
+    for (let i = 0; i < jobDescLines.length; ++i) {
+        let jobLine = jobDescLines[i];
+
+        jobLine = jobLine.trim();
+
+        jobDescLines[i] = jobLine
+    }
+
+    jobDescText = jobDescLines.join('\n');
+
+    console.log(jobDescText);
 
     return jobDescText;
 }
@@ -71,45 +119,32 @@ function addHighlights(pageType, jobDescription, feature) {
     // feature
     const statements = jobDescription.match(feature.matching) ?? [];
 
-    let jobHighlights;
-    switch (pageType) {
-        case "search":
-        case "recommended":
-            jobHighlights = document.getElementsByClassName("jobs-unified-top-card__content--two-pane")[0].children[2].firstElementChild;
-            break;
-        case "view":
-            jobHighlights = document.getElementsByClassName("jobs-unified-top-card")[0].children[0].children[0].children[3].firstElementChild;
-            break;
-        default:
-            throw new Error("Unknown page type");
-    }
+    if (statements.length === 0)
+        return false;
+
+    const highlightGroupContainer = document.getElementsByClassName("linkedin-jobs-extended-highlight-group-container")[0];
 
     for (let st of statements) {
-        // Create parent highlight block
-        const highlight = document.createElement('li');
-        highlight.classList.add("jobs-unified-top-card__job-insight");
+        const highlightContainer = document.createElement("div");
 
-        // Create highlight icon
-        const highlightIcon = document.createElement('div');
-        highlightIcon.classList.add("flex-shrink-zero", "mr2", "t-black--light");
-        highlightIcon.innerHTML = `<div class="ivm-image-view-model">
-        <div class="ivm-view-attr__img-wrapper ivm-view-attr__img-wrapper--use-img-tag display-flex">
-        <li-icon aria-hidden="true" type="job" size="large">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" data-supported-dps="24x24" fill="none" class="mercado-match" width="24" height="24" focusable="false" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        ${feature.iconHTML}
-        </svg>
-        </li-icon>
-        </div>
-        </div>`;
+        highlightContainer.setAttribute("style", `
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+        `);
 
-        // Create highlight text
-        const highlightText = document.createElement("span");
-        highlightText.textContent = st;
+        highlightContainer.innerHTML = `
+            <div style="display: flex; align-items: center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" width="20" height="20" focusable="false" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                    ${feature.iconHTML}
+                </svg>
+            </div>
+            <div>${st}</div>
+        `;
 
-        // Insert into page
-        highlight.insertAdjacentElement("beforeend", highlightIcon);
-        highlight.insertAdjacentElement("beforeend", highlightText);
-        jobHighlights.insertAdjacentElement('beforeend', highlight);
+        highlightGroupContainer.insertAdjacentElement("beforeend", highlightContainer);
+
+        return true;
     }
 }
 
@@ -119,22 +154,22 @@ let featureOptions = [];
 const featureList = [
     {
         name: "yearsOfExperience",
-        matching: /[^\.\n]*(\d+-)?\d+(\+| plus)? years?[^\n]*experience[^\.\n]*/gi,
+        matching: /[^\n]*(\d+-)?\d+(\+| plus)? years?[^\n]*experience[^\n]*/gi,
         iconHTML: `<path d="M20 6 9 17 4 12"></path>`
     },
     {
         name: "education",
-        matching: /[^\.\n]*((bachelor|master)('|’)?s degree|degree in|doctorate|phd)[^\.\n]*/gi,
+        matching: /[^\n]*((bachelor|master)('|’)?s degree|degree in|doctorate|phd)[^\n]*/gi,
         iconHTML: `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>`
     },
     {
         name: "certifications",
-        matching: /[^\.\n]*(certified|certification)[^\.\n]*/gi,
+        matching: /[^\n]*(certified|certification)[^\n]*/gi,
         iconHTML: `<circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>`
     },
     {
         name: "driversLicense",
-        matching: /[^\.\n]*driver’s license[^\.\n]*/gi,
+        matching: /[^\n]*driver’s license[^\n]*/gi,
         iconHTML: `<rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line>`
     },
     {
