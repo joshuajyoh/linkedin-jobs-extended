@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "LinkedIn Jobs Extended",
-    "description": "Includes additional information in the highlights section of LinkedIn job postings, using the content of the job description.",
+    "description": "A Chrome extension that searches LinkedIn job postings for key details and adds them to the top for easy viewing.",
     "version": "1.0.0",
     "icons": {
         "16": "icons/icon-16.png",
