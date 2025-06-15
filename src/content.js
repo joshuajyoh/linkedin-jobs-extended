@@ -54,7 +54,7 @@ tryRun(currentURL);
 
 async function tryRun(url) {
     const pageType = identifyPageType(url);
-    console.log(pageType);
+
     if (pageType !== "invalid")
         await run(pageType);
 }
@@ -186,7 +186,7 @@ async function getJobDescription() {
     }
 
     jobDescText = jobDescLines.join('\n');
-    console.log(jobDescText);
+
     return jobDescText;
 }
 
