@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "LInkedIn Jobs Extended",
+    "name": "LinkedIn Jobs Extended",
     "description": "Includes additional information in the highlights section of LinkedIn job postings, using the content of the job description.",
-    "version": "0.12.5",
+    "version": "1.0.0",
     "icons": {
         "16": "icons/icon-16.png",
         "32": "icons/icon-32.png",
