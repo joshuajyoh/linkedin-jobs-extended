@@ -1,3 +1,8 @@
+let currentURL = document.URL;
+
+// Determines whether feature is searched for or not
+let featureOptions;
+
 // At start of content script get options values
 chrome.storage.sync.get(
     {
@@ -36,9 +41,53 @@ chrome.storage.sync.onChanged.addListener((changes) => {
     ];
 });
 
+document.addEventListener("click", () => {
+    const eventTimeURL = document.URL;
+
+    if (currentURL !== eventTimeURL) {
+        currentURL = eventTimeURL;
+        tryRun(currentURL);
+    }
+});
+
+tryRun(currentURL);
+
+async function tryRun(url) {
+    const pageType = identifyPageType(url);
+    console.log(pageType);
+    if (pageType !== "invalid")
+        await run(pageType);
+}
+
+function identifyPageType(url) {
+    const jobPageURLs = [
+        {
+            pageType: "search",
+            matching: /https:\/\/www.linkedin.com\/jobs\/search\/\?currentJobId=.*/
+        },
+        {
+            pageType: "view",
+            matching: /https:\/\/www.linkedin.com\/jobs\/view\/\d+\/*/
+        },
+        {
+            pageType: "recommended",
+            matching: /https:\/\/www.linkedin.com\/jobs\/collections\/recommended\/\?currentJobId=.*/
+        }
+    ];
+
+    let pageType = "invalid";
+
+    for (let jobPageURL of jobPageURLs) {
+        if (jobPageURL.matching.test(url))
+            pageType = jobPageURL.pageType;
+    }
+
+    return pageType;
+}
+
 // Parse the page's job description, find lines relevant to specified
 // requirements, and add them to the page's highlights
-function run(pageType) {
+async function run(pageType) {
     const oldHighlightGroupContainer = document.getElementsByClassName("linkedin-jobs-extended-highlight-group-container")?.[0];
 
     if (oldHighlightGroupContainer !== undefined)
@@ -52,16 +101,11 @@ function run(pageType) {
         margin-top: 16px;
     `);
 
-    let jobDetailsBlock;
+    let jobDetailsBlock = document.getElementsByClassName("job-details-preferences-and-skills")[0];
 
-    switch (pageType) {
-        case "search":
-        case "recommended":
-        case "view":
-            jobDetailsBlock = document.getElementsByClassName("job-details-preferences-and-skills")[0];
-            break;
-        default:
-            throw new Error("Unknown page type");
+    while (!jobDetailsBlock) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        jobDetailsBlock = document.getElementsByClassName("job-details-preferences-and-skills")[0];
     }
 
     jobDetailsBlock.insertAdjacentElement("afterend", highlightGroupContainer);
@@ -70,7 +114,35 @@ function run(pageType) {
 
     let noFeaturesFound = true;
 
-    for (let i = 0; i < featureList.length;++i) {
+    const featureList = [
+        {
+            name: "yearsOfExperience",
+            matching: /[^\n]*(\d+-)?\d+(\+| plus)? years?[^\n]*experience[^\n]*/gi,
+            iconHTML: `<path d="M20 6 9 17 4 12"></path>`
+        },
+        {
+            name: "education",
+            matching: /[^\n]*((bachelor|master)('|’)?s degree|degree in|doctorate|phd)[^\n]*/gi,
+            iconHTML: `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>`
+        },
+        {
+            name: "certifications",
+            matching: /[^\n]*(certified|certification)[^\n]*/gi,
+            iconHTML: `<circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>`
+        },
+        {
+            name: "driversLicense",
+            matching: /[^\n]*driver’s license[^\n]*/gi,
+            iconHTML: `<rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line>`
+        },
+        {
+            name: "coverLetter",
+            matching: /[^\.\n]*cover letter[^\.\n]*/gi,
+            iconHTML: `<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline>`
+        }
+    ];
+
+    for (let i = 0; i < featureList.length; ++i) {
         if (featureOptions[i]) {
             if (addHighlights(pageType, jobDescription, featureList[i]))
                 noFeaturesFound = false;
@@ -107,7 +179,7 @@ function getJobDescription() {
     }
 
     jobDescText = jobDescLines.join('\n');
-
+    console.log(jobDescText);
     return jobDescText;
 }
 
@@ -145,34 +217,3 @@ function addHighlights(pageType, jobDescription, feature) {
         return true;
     }
 }
-
-// Determines whether feature is searched for or not
-let featureOptions = [];
-
-const featureList = [
-    {
-        name: "yearsOfExperience",
-        matching: /[^\n]*(\d+-)?\d+(\+| plus)? years?[^\n]*experience[^\n]*/gi,
-        iconHTML: `<path d="M20 6 9 17 4 12"></path>`
-    },
-    {
-        name: "education",
-        matching: /[^\n]*((bachelor|master)('|’)?s degree|degree in|doctorate|phd)[^\n]*/gi,
-        iconHTML: `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>`
-    },
-    {
-        name: "certifications",
-        matching: /[^\n]*(certified|certification)[^\n]*/gi,
-        iconHTML: `<circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>`
-    },
-    {
-        name: "driversLicense",
-        matching: /[^\n]*driver’s license[^\n]*/gi,
-        iconHTML: `<rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line>`
-    },
-    {
-        name: "coverLetter",
-        matching: /[^\.\n]*cover letter[^\.\n]*/gi,
-        iconHTML: `<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline>`
-    }
-];

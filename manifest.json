@@ -9,7 +9,7 @@
         "48": "icons/icon-48.png",
         "128": "icons/icon-128.png"
     },
-    "permissions": [ "storage", "tabs" ],
+    "permissions": [ "storage" ],
     "action": {
         "default_popup": "src/popup/popup.html"
     },
@@ -21,11 +21,8 @@
         {
             "js": [ "src/content.js" ],
             "matches": [
-                "https://www.linkedin.com/*"
+                "https://www.linkedin.com/jobs/*"
             ]
         }
-    ],
-    "background": {
-        "service_worker": "src/service-worker.js"
-    }
+    ]
 }
