@@ -104,13 +104,13 @@ async function run(pageType) {
     let jobDetailsBlock = document.getElementsByClassName("job-details-preferences-and-skills")[0];
 
     while (!jobDetailsBlock) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 500));
         jobDetailsBlock = document.getElementsByClassName("job-details-preferences-and-skills")[0];
     }
 
     jobDetailsBlock.insertAdjacentElement("afterend", highlightGroupContainer);
 
-    const jobDescription = getJobDescription();
+    const jobDescription = await getJobDescription();
 
     let noFeaturesFound = true;
 
@@ -154,14 +154,21 @@ async function run(pageType) {
 }
 
 // Parse the page's job description and format into a multi-line string
-function getJobDescription() {
-    const jobDescHTML = document.getElementsByClassName("jobs-box__html-content")[0].children[1].children[0];
+async function getJobDescription() {
+    let jobDescHTML = document.getElementsByClassName("jobs-box__html-content")[0].children[1].children[0];
+
+    while (!jobDescHTML) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        jobDescHTML = document.getElementsByClassName("jobs-box__html-content")[0].children[1].children[0];
+    }
 
     let jobDescText = jobDescHTML.innerHTML;
 
     // Manage element tags
     jobDescText = jobDescText.replaceAll(/(<\/?(strong|i|ul|u|(span( class="white-space-pre")?))>|<(p|li)>|<!---->|      )/g, "");
     jobDescText = jobDescText.replaceAll(/<br>|<\/(p|li)>/g, "\n");
+
+    jobDescText = jobDescText.replaceAll(/\. /g, "\.\n");
 
     // Manage whitespace
     jobDescText = jobDescText.replaceAll(/\n\n+/g, "\n");
