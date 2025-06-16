@@ -110,25 +110,24 @@ async function run(pageType) {
 
     jobDetailsBlock.insertAdjacentElement("afterend", highlightGroupContainer);
 
-    const jobDescription = await getJobDescription();
-    const jobDescriptionLines = jobDescription.split('\n');
+    const jobDescriptionLines = await getJobDescription();
 
     let noFeaturesFound = true;
 
     const featureList = [
         {
             name: "yearsOfExperience",
-            matching: /.*(\d+-)?\d+(\+| plus)? (years|yrs)?( of|[^\n]*(experience)).*/gi,
+            matching: /.*(\d+-)?\d+(\+| plus)? (years|yrs) (in|of|[^\n]*(experience)).*/gi,
             iconHTML: `<path d="M20 6 9 17 4 12"></path>`
         },
         {
             name: "education",
-            matching: /.*(((bachelor|master)('|’)?s? degree)|(degree in)|doctorate|phd).*/gi,
+            matching: /.*(((bachelor|master)('|’)?s? degree)|(degree in)|doctorate|phd|diploma).*/gi,
             iconHTML: `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>`
         },
         {
             name: "certifications",
-            matching: /.*(certified|certification).*/gi,
+            matching: /(.*certificate|(.*(relevant|with)\s|^(\w+\s){0,3})certification[^\sauthorities]).*/gi,
             iconHTML: `<circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>`
         },
         {
@@ -168,8 +167,8 @@ async function getJobDescription() {
     let jobDescText = jobDescHTML.innerHTML;
 
     // Remove markup
-    jobDescText = jobDescText.replaceAll(/(<\/?(strong|i|ul|u|(span( class="white-space-pre")?))>|<(p|li)>|<!---->|      )/g, "");
-    jobDescText = jobDescText.replaceAll(/<br>|<\/(p|li)>/g, "\n");
+    jobDescText = jobDescText.replaceAll(/(<\/?(strong|i|ul|u)>|<(p|li|span)>|<!---->|      )/g, "");
+    jobDescText = jobDescText.replaceAll(/<br>|<\/(p|li|(span( class="white-space-pre")?))>/g, "\n");
 
     // Remove whitespace
     jobDescText = jobDescText.replaceAll(/\u0020\u0020+/g, "\u0020");
@@ -181,13 +180,13 @@ async function getJobDescription() {
 
     // Separate sentences
     jobDescText = jobDescText.replaceAll(/\.\u0020/g, "\.\n");
+    jobDescText = jobDescText.replaceAll(/!\u0020/g, "!\n");
 
     // Prevent separating based on periods used for abbreviations
 
     const abbreviations = [ "Jr", "Sr", "etc" ];
 
     for (let abbr of abbreviations) {
-        console.log(abbr);
         jobDescText = jobDescText.replaceAll(new RegExp(`\u0020${abbr}\.\n`, "g"), `\u0020${abbr}\.\u0020`);
     }
 
@@ -202,9 +201,7 @@ async function getJobDescription() {
         jobDescLines[i] = jobLine
     }
 
-    jobDescText = jobDescLines.join('\n');
-
-    return jobDescText;
+    return jobDescLines;
 }
 
 // Insert additional highlights into the page's HTML
@@ -212,8 +209,7 @@ function addHighlights(jobDescriptionLine, feature) {
     // Get statements from the job description relevant to the specified
     // feature
     const statements = jobDescriptionLine.match(feature.matching) ?? [];
-    console.log(feature.name);
-    console.log(statements);
+
     if (statements.length === 0)
         return false;
 
