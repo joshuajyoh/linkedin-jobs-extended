@@ -25,11 +25,6 @@ chrome.storage.sync.get(
     }
 );
 
-// Run when notified by the service worker
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    setTimeout(() => { run(request.pageType); }, request.delay);
-});
-
 // Match when options update
 chrome.storage.sync.onChanged.addListener((changes) => {
     featureOptions = [
