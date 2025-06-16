@@ -117,12 +117,12 @@ async function run(pageType) {
     const featureList = [
         {
             name: "yearsOfExperience",
-            matching: /[^\n]*(\d+-)?\d+(\+| plus)? years?[^\n]*experience[^\n]*/gi,
+            matching: /[^\n]*(\d+-)?\d+(\+| plus)? (years|yrs)?( of|[^\n]*(experience))[^\n]*/gi,
             iconHTML: `<path d="M20 6 9 17 4 12"></path>`
         },
         {
             name: "education",
-            matching: /[^\n]*((bachelor|master)('|’)?s degree|degree in|doctorate|phd)[^\n]*/gi,
+            matching: /[^\n]*(((bachelor|master)('|’)?s? degree)|(degree in)|doctorate|phd)[^\n]*/gi,
             iconHTML: `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>`
         },
         {
@@ -137,14 +137,14 @@ async function run(pageType) {
         },
         {
             name: "coverLetter",
-            matching: /[^\.\n]*cover letter[^\.\n]*/gi,
+            matching: /[^\n]*cover letter[^\n]*/gi,
             iconHTML: `<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline>`
         }
     ];
 
     for (let i = 0; i < featureList.length; ++i) {
         if (featureOptions[i]) {
-            if (addHighlights(pageType, jobDescription, featureList[i]))
+            if (addHighlights(jobDescription, featureList[i]))
                 noFeaturesFound = false;
         }
     }
@@ -164,15 +164,29 @@ async function getJobDescription() {
 
     let jobDescText = jobDescHTML.innerHTML;
 
-    // Manage element tags
+    // Remove markup
     jobDescText = jobDescText.replaceAll(/(<\/?(strong|i|ul|u|(span( class="white-space-pre")?))>|<(p|li)>|<!---->|      )/g, "");
     jobDescText = jobDescText.replaceAll(/<br>|<\/(p|li)>/g, "\n");
 
-    jobDescText = jobDescText.replaceAll(/\. /g, "\.\n");
-
-    // Manage whitespace
+    // Remove whitespace
+    jobDescText = jobDescText.replaceAll(/\u0020\u0020+/g, "\u0020");
     jobDescText = jobDescText.replaceAll(/\n\n+/g, "\n");
     jobDescText = jobDescText.trim();
+
+    // Remove bullet points
+    jobDescText = jobDescText.replaceAll(/\n[\-\*\u2022\u00B7]\u0020/g, "\n");
+
+    // Separate sentences
+    jobDescText = jobDescText.replaceAll(/\.\u0020/g, "\.\n");
+
+    // Prevent separating based on periods used for abbreviations
+
+    const abbreviations = [ "Jr", "Sr", "etc" ];
+
+    for (let abbr of abbreviations) {
+        console.log(abbr);
+        jobDescText = jobDescText.replaceAll(new RegExp(`\u0020${abbr}\.\n`, "g"), `\u0020${abbr}\.\u0020`);
+    }
 
     const jobDescLines = jobDescText.split('\n');
 
@@ -191,11 +205,12 @@ async function getJobDescription() {
 }
 
 // Insert additional highlights into the page's HTML
-function addHighlights(pageType, jobDescription, feature) {
+function addHighlights(jobDescription, feature) {
     // Get statements from the job description relevant to the specified
     // feature
     const statements = jobDescription.match(feature.matching) ?? [];
-
+    console.log(feature.name);
+    console.log(statements);
     if (statements.length === 0)
         return false;
 
@@ -220,7 +235,7 @@ function addHighlights(pageType, jobDescription, feature) {
         `;
 
         highlightGroupContainer.insertAdjacentElement("beforeend", highlightContainer);
-
-        return true;
     }
+
+    return true;
 }
