@@ -111,41 +111,44 @@ async function run(pageType) {
     jobDetailsBlock.insertAdjacentElement("afterend", highlightGroupContainer);
 
     const jobDescription = await getJobDescription();
+    const jobDescriptionLines = jobDescription.split('\n');
 
     let noFeaturesFound = true;
 
     const featureList = [
         {
             name: "yearsOfExperience",
-            matching: /[^\n]*(\d+-)?\d+(\+| plus)? (years|yrs)?( of|[^\n]*(experience))[^\n]*/gi,
+            matching: /.*(\d+-)?\d+(\+| plus)? (years|yrs)?( of|[^\n]*(experience)).*/gi,
             iconHTML: `<path d="M20 6 9 17 4 12"></path>`
         },
         {
             name: "education",
-            matching: /[^\n]*(((bachelor|master)('|’)?s? degree)|(degree in)|doctorate|phd)[^\n]*/gi,
+            matching: /.*(((bachelor|master)('|’)?s? degree)|(degree in)|doctorate|phd).*/gi,
             iconHTML: `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>`
         },
         {
             name: "certifications",
-            matching: /[^\n]*(certified|certification)[^\n]*/gi,
+            matching: /.*(certified|certification).*/gi,
             iconHTML: `<circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>`
         },
         {
             name: "driversLicense",
-            matching: /[^\n]*driver’s license[^\n]*/gi,
+            matching: /.*driver’s license.*/gi,
             iconHTML: `<rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line>`
         },
         {
             name: "coverLetter",
-            matching: /[^\n]*cover letter[^\n]*/gi,
+            matching: /.*cover letter.*/gi,
             iconHTML: `<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline>`
         }
     ];
 
     for (let i = 0; i < featureList.length; ++i) {
         if (featureOptions[i]) {
-            if (addHighlights(jobDescription, featureList[i]))
-                noFeaturesFound = false;
+            for (let jobDescriptionLine of jobDescriptionLines) {
+                if (addHighlights(jobDescriptionLine, featureList[i]))
+                    noFeaturesFound = false;
+            }
         }
     }
 
@@ -205,10 +208,10 @@ async function getJobDescription() {
 }
 
 // Insert additional highlights into the page's HTML
-function addHighlights(jobDescription, feature) {
+function addHighlights(jobDescriptionLine, feature) {
     // Get statements from the job description relevant to the specified
     // feature
-    const statements = jobDescription.match(feature.matching) ?? [];
+    const statements = jobDescriptionLine.match(feature.matching) ?? [];
     console.log(feature.name);
     console.log(statements);
     if (statements.length === 0)
